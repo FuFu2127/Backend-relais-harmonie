@@ -114,12 +114,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    // Le hachage du mot de passe ne se fait PAS dans l'entité elle-même pour les requêtes API Platform POST/PUT.
-    // Il doit être géré par un DataPersister (recommandé avec API Platform) ou un EventListener.
-    // Cette méthode ne doit recevoir QUE le HASH du mot de passe.
     public function setPassword(string $password): static
     {
-        $this->password = $password; // Ici, $password DOIT être le mot de passe HACHÉ
+        $this->password = $password; 
         return $this;
     }
 
@@ -207,7 +204,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->comments->contains($comment)) {
             $this->comments->add($comment);
-            $comment->setAuthor($this);
+            $comment->setUser($this); // <-- corrigez ici
         }
         return $this;
     }
@@ -216,8 +213,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->comments->removeElement($comment)) {
             // set the owning side to null (unless already changed)
-            if ($comment->getAuthor() === $this) {
-                $comment->setAuthor(null);
+            if ($comment->getUser() === $this) { // <-- corrigez ici
+                $comment->setUser(null);
             }
         }
         return $this;

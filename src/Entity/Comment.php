@@ -34,13 +34,10 @@ class Comment
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     #[MaxDepth(1)]
-    private ?User $author = null;
-
-    #[ORM\ManyToOne(inversedBy: 'comments')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull]
-    #[MaxDepth(1)]
     private ?Act $act = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'comments')]
+    private ?User $user = null;
 
     public function __construct()
     {
@@ -73,17 +70,6 @@ class Comment
         return $this->updatedAt;
     }
 
-    public function getAuthor(): ?User
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(?User $author): static
-    {
-        $this->author = $author;
-        return $this;
-    }
-
     public function getAct(): ?Act
     {
         return $this->act;
@@ -92,6 +78,17 @@ class Comment
     public function setAct(?Act $act): static
     {
         $this->act = $act;
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
         return $this;
     }
 

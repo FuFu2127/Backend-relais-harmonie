@@ -26,7 +26,7 @@ class CommentCrudController extends AbstractCrudController
             ->setRequired(true)
             ->setMaxLength(1000)
             ->setHelp('Le contenu du commentaire ne doit pas dépasser 1000 caractères'),
-            AssociationField::new('author')
+            AssociationField::new('user')
             ->setLabel('Auteur')
             ->setRequired(true),
             AssociationField::new('act')
