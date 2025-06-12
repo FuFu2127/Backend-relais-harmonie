@@ -152,4 +152,9 @@ class Challenge
 
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return $this->getTitle() ?? (string)$this->getId();
+    }
 }

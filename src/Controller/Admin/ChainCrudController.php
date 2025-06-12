@@ -7,6 +7,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 
 class ChainCrudController extends AbstractCrudController
 {
@@ -15,14 +17,24 @@ class ChainCrudController extends AbstractCrudController
         return Chain::class;
     }
 
-    /*
+    
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id'),
-            TextField::new('title'),
-            TextEditorField::new('description'),
+            IdField::new('id')->onlyOnIndex(),
+            TextField::new('invitationToken')
+                ->setLabel('Token d\'invitation')
+                ->setHelp('Doit être unique, min 6 caractères'),
+            DateTimeField::new('createdAt')
+                ->setLabel('Créé le')
+                ->onlyOnDetail(),
+            DateTimeField::new('updatedAt')
+                ->setLabel('Mis à jour le')
+                ->onlyOnDetail(),
+            AssociationField::new('act')
+                ->setLabel('Acte associé')
+                ->onlyOnDetail(),
         ];
     }
-    */
+    
 }

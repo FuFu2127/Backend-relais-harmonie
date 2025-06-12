@@ -31,7 +31,7 @@ class Chain
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\OneToOne(mappedBy: 'chain', targetEntity: Act::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'chain', targetEntity: Act::class)]
     #[MaxDepth(1)]
     private ?Act $act = null;
 

@@ -4,10 +4,9 @@ namespace App\Controller\Admin;
 
 use App\Entity\Comment;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class CommentCrudController extends AbstractCrudController
@@ -23,17 +22,23 @@ class CommentCrudController extends AbstractCrudController
         return [
             IdField::new('id')->onlyOnIndex(),
             TextareaField::new('content')
-                ->setLabel('Contenu')
-                ->setRequired(true)
-                ->setMaxLength(2000)
-                ->setHelp('Le contenu du commentaire ne doit pas dépasser 2000 caractères'),
+            ->setLabel('Contenu')
+            ->setRequired(true)
+            ->setMaxLength(1000)
+            ->setHelp('Le contenu du commentaire ne doit pas dépasser 1000 caractères'),
+            AssociationField::new('author')
+            ->setLabel('Auteur')
+            ->setRequired(true),
+            AssociationField::new('act')
+            ->setLabel('Acte')
+            ->setRequired(true),
             DateTimeField::new('createdAt')
-                ->setLabel('Date de création')
-                ->onlyOnIndex(),
+            ->setLabel('Date de création')
+            ->onlyOnIndex(),
             DateTimeField::new('updatedAt')
-                ->setLabel('Date de mise à jour')
-                ->onlyOnIndex()
-                ->setFormTypeOption('disabled', true)
+            ->setLabel('Date de mise à jour')
+            ->onlyOnIndex()
+            ->setFormTypeOption('disabled', true)
         ];
     }
     

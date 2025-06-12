@@ -11,7 +11,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiResource;
-use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -70,10 +69,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->roles = ['ROLE_USER']; // Assurez-vous que chaque nouvel utilisateur a au moins ROLE_USER
+        $this->roles = ['ROLE_USER'];
         $this->acts = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->likes = new ArrayCollection();
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTimeImmutable();
+        }
     }
 
 
@@ -285,5 +287,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getPseudo() ?? $this->getEmail() ?? (string)$this->getId();
     }
 }

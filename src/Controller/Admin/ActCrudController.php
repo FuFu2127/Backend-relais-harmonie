@@ -8,7 +8,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
@@ -38,13 +37,13 @@ class ActCrudController extends AbstractCrudController
                 ->setRequired(true)
                 ->setHelp('Sélectionnez une catégorie pour cet acte')
                 ->setChoices([
-                    'Solidarité' => 'solidarité',
-                    'Nature' => 'nature',
-                    'Spiritualité' => 'spiritualité',
-                    'Culture' => 'culture',
-                    'Animaux' => 'animaux',
-                    'Partage' => 'partage',
-                    'Inspiration' => 'inspiration',
+                    'Solidarité' => 'Solidarité',
+                    'Nature' => 'Nature',
+                    'Spiritualité' => 'Spiritualité',
+                    'Culture' => 'Culture',
+                    'Animaux' => 'Animaux',
+                    'Partage' => 'Partage',
+                    'Inspiration' => 'Inspiration',
                 ]),
             TextField::new('imgUrl')
                 ->setLabel('URL de l\'image')

@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: ActRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ApiResource]
+#[ORM\EntityListeners(['App\EventListener\ActListener'])]
 class Act
 {
     #[ORM\Id]
@@ -66,7 +67,8 @@ class Act
     #[MaxDepth(1)]
     private Collection $comments;
 
-    #[ORM\OneToOne(mappedBy: 'act', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'act', targetEntity: Chain::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: 'chain_id', referencedColumnName: 'id', nullable: true)]
     #[MaxDepth(1)]
     private ?Chain $chain = null;
 
@@ -255,5 +257,10 @@ class Act
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->title ?? 'Acte';
     }
 }
