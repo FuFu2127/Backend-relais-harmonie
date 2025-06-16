@@ -15,7 +15,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ActRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new \ApiPlatform\Metadata\Get(),
+        new \ApiPlatform\Metadata\Post(security: "is_granted('IS_AUTHENTICATED_FULLY')"),
+        new \ApiPlatform\Metadata\GetCollection(),
+        // autres opérations si besoin
+    ]
+)]
 #[ORM\EntityListeners(['App\EventListener\ActListener'])]
 class Act
 {
@@ -50,8 +57,7 @@ class Act
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'acts')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull]
+    #[ORM\JoinColumn(nullable: true)]
     #[MaxDepth(1)]
     private ?User $user = null;
 
@@ -67,10 +73,6 @@ class Act
     #[MaxDepth(1)]
     private Collection $comments;
 
-    #[ORM\OneToOne(inversedBy: 'act', targetEntity: Chain::class, cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'chain_id', referencedColumnName: 'id', nullable: true)]
-    #[MaxDepth(1)]
-    private ?Chain $chain = null;
 
     #[ORM\OneToMany(mappedBy: 'act', targetEntity: Like::class, orphanRemoval: true)]
     #[MaxDepth(1)]
@@ -197,17 +199,6 @@ class Act
                 $comment->setAct(null);
             }
         }
-        return $this;
-    }
-
-    public function getChain(): ?Chain
-    {
-        return $this->chain;
-    }
-
-    public function setChain(?Chain $chain): static
-    {
-        $this->chain = $chain;
         return $this;
     }
 

@@ -22,3 +22,21 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    api_request_matcher:
+        class: Symfony\Component\HttpFoundation\RequestMatcher
+        arguments:
+            - '^/api'                       # path
+            - null                          # host
+            - null                          # methods
+            - null                          # ips
+            - []                            # attributes (doit être un tableau vide)
+            - '!^/api/(register|login_check)' # path to exclude
+
+    App\DataPersister\ActDataPersister:
+        decorates: 'api_platform.doctrine.orm.state.persist_processor'
+        arguments:
+            - '@security.helper'
+            - '@App\DataPersister\ActDataPersister.inner'
+        autoconfigure: false
+        autowire: false

@@ -3,7 +3,6 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Act;
-use App\Entity\Chain;
 use App\Entity\Challenge;
 use App\Entity\Contact;
 use App\Entity\Comment;
@@ -54,7 +53,6 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
         yield MenuItem::linkToCrud('Acts', 'fas fa-list', Act::class);
-        yield MenuItem::linkToCrud('Chains', 'fas fa-list', Chain::class);
         yield MenuItem::linkToCrud('Challenges', 'fas fa-list', Challenge::class);
         yield MenuItem::linkToCrud('Contacts', 'fas fa-list', Contact::class);
         yield MenuItem::linkToCrud('Comments', 'fas fa-list', Comment::class);

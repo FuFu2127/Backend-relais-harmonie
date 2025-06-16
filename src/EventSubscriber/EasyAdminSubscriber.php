@@ -4,10 +4,6 @@
 namespace App\EventSubscriber;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Dom\Entity;
-use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeCrudActionEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
@@ -16,65 +12,46 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private UserPasswordHasherInterface $passwordHasher,
-        private UserRepository $userRepository,
-        private EntityManagerInterface $em
+        private UserPasswordHasherInterface $passwordHasher
     ) {}
 
-
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             BeforeEntityPersistedEvent::class => ['hashPasswordPersist'],
-            BeforeEntityUpdatedEvent::class => ['hashPasswordUpdate']
+            BeforeEntityUpdatedEvent::class => ['hashPasswordUpdate'],
         ];
     }
 
-    public function hashPasswordPersist(BeforeEntityPersistedEvent $event)
+    public function hashPasswordPersist(BeforeEntityPersistedEvent $event): void
     {
         $entity = $event->getEntityInstance();
 
-        if ($entity instanceof User) {
-            if ($entity->getPassword() !== null) {
-                $this->hashPassword($entity, $entity->getPassword());
-            }
-        } else {
-            $dbUser = $this->em->createQueryBuilder()
-                    ->select('u')
-                    ->from(User::class, 'u')
-                    ->where('u.id = :id')
-                    ->setParameter('id', $entity->getId())
-                    ->getQuery()
-                    ->getScalarResult();
-                if ($dbUser[0]['u_password'] !== null) {
-                    $entity->setPassword(trim($dbUser[0]['u_password']));
-                }
+        if (!$entity instanceof User) {
+            // Ne rien faire si ce n'est pas un User
+            return;
+        }
+
+        if ($entity->getPassword() !== null) {
+            $this->hashPassword($entity, $entity->getPassword());
         }
     }
 
-    public function hashPasswordUpdate(BeforeEntityUpdatedEvent $event)
+    public function hashPasswordUpdate(BeforeEntityUpdatedEvent $event): void
     {
         $entity = $event->getEntityInstance();
 
-        if ($entity instanceof User) {
-            if ($entity->getPassword() !== null) {
-                $this->hashPassword($entity, $entity->getPassword());
-            } else {
-                $dbUser = $this->em->createQueryBuilder()
-                    ->select('u')
-                    ->from(User::class, 'u')
-                    ->where('u.id = :id')
-                    ->setParameter('id', $entity->getId())
-                    ->getQuery()
-                    ->getScalarResult();
-                if ($dbUser[0]['u_password'] !== null) {
-                    $entity->setPassword(trim($dbUser[0]['u_password']));
-                }
-            }
+        if (!$entity instanceof User) {
+            // Ne rien faire si ce n'est pas un User
+            return;
+        }
+
+        if ($entity->getPassword() !== null) {
+            $this->hashPassword($entity, $entity->getPassword());
         }
     }
 
-    private function hashPassword(&$user, $plaintextPassword)
+    private function hashPassword(User $user, string $plaintextPassword): void
     {
         $hashedPassword = $this->passwordHasher->hashPassword(
             $user,
