@@ -2,17 +2,24 @@
 
 namespace App\Entity;
 
-use App\Enum\ContactSubject;
 use App\Repository\ContactRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiResource;
-use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\Post;
+
 
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Post( 
+            uriTemplate: '/contacts',
+            security: "is_granted('PUBLIC_ACCESS')" // Acces public pour la création de contact
+        )
+    ]
+)]
 class Contact
 {
     #[ORM\Id]

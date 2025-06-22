@@ -1,32 +1,43 @@
 security:
-    password_hashers:
-        App\Entity\User:
-            algorithm: auto
+    password_hashers: # Configuration des algorithmes de hachage pour les mots de passe
+        App\Entity\User: # Utilisation de l'algorithme de hachage pour les mots de passe des utilisateurs
+            algorithm: auto # Utilisation de l'algorithme de hachage automatique pour les mots de passe des utilisateurs
 
-    providers:
-        app_user_provider:
+    providers: # Définition des utilisateurs pour l'authentification
+        app_user_provider: 
             entity:
-                class: App\Entity\User
-                property: email
+                class: App\Entity\User # Classe de l'entité utilisateur
+                property: email # Propriété utilisée pour identifier l'utilisateur (email)
 
-    firewalls:
-        login:
-            pattern:  ^/api/login_check
-            stateless: true
-            json_login:
-                check_path:               /api/login_check
-                username_path:            email
-                password_path:            password
-                success_handler:          lexik_jwt_authentication.handler.authentication_success
-                failure_handler:          lexik_jwt_authentication.handler.authentication_failure
+    firewalls: # Définition des firewalls pour la sécurité de l'application
+        public: # Firewall pour les routes publiques
+            pattern: ^/api/contacts # Chemin pour le contact
+            stateless: true 
+
+        login: # Endpoint pour la connexion des utilisateurs
+            pattern:  ^/api/login_check # Chemin pour la vérification de connexion
+            stateless: true # Indique que ce firewall ne conserve pas l'état entre les requêtes
+            json_login: # Utilisation de JSON pour l'authentification
+                check_path:               /api/login_check # Chemin pour vérifier les informations d'identification
+                username_path:            email # Chemin pour le nom d'utilisateur (email)
+                password_path:            password # Chemin pour le mot de passe
+                success_handler:          lexik_jwt_authentication.handler.authentication_success # Gestionnaire de succès pour l'authentification
+                failure_handler:          lexik_jwt_authentication.handler.authentication_failure # Gestionnaire d'échec pour l'authentification
 
         api:
-            pattern: ^/api
-            stateless: true
-            jwt: ~
+            pattern:   ^/api/ # Toutes les routes de l'API
+            stateless: true 
+            jwt: ~ # Utilisation de JWT pour l'authentification
 
     access_control:
-        - { path: ^/api/login_check, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
-        - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/login_check, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Login endpoint pour JWT authentication
+        - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] } # Endpoint pour l'enregistrement des utilisateurs
+        - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] } # Endpoint pour la création d'un utilisateur
+        - { path: ^/api/contacts, methods: [POST], roles: IS_AUTHENTICATED_ANONYMOUSLY } # Endpoint pour l'envoi de messages de contact
+        - { path: ^/api/challenges, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer les défis
+        - { path: ^/api/acts, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer les actes
+        - { path: ^/api/users/\d+$, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer un utilisateur spécifique
+        - { path: ^/api/challenges, roles: IS_AUTHENTICATED_FULLY } # Endpoint pour les opérations sur les défis (POST, PUT, DELETE)
+        - { path: ^/api/acts, roles: IS_AUTHENTICATED_FULLY } # Endpoint pour les opérations sur les actes (POST, PUT, DELETE)
+        - { path: ^/api/comments, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer les commentaires
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY } # Toutes les autres routes de l'API nécessitent une authentification complète

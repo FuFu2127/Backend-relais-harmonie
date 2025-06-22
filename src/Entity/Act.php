@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Entity\Like;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use ApiPlatform\Metadata\ApiProperty;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,18 +15,26 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\DataTransformer\MultipartActDataTransformer;
 
 #[ORM\Entity(repositoryClass: ActRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ApiResource(
     operations: [
-        new \ApiPlatform\Metadata\Get(),
-        new \ApiPlatform\Metadata\Post(security: "is_granted('IS_AUTHENTICATED_FULLY')"),
-        new \ApiPlatform\Metadata\GetCollection(),
-        // autres opérations si besoin
+        new \ApiPlatform\Metadata\Get(), // Accès public
+        new \ApiPlatform\Metadata\Post( // Création d'un nouvel acte
+            security: "is_granted('IS_AUTHENTICATED_FULLY')", // Authentification requise pour créer
+            inputFormats: ['multipart' => ['multipart/form-data']], // Format attendu
+            deserialize: false, // Désérialisation gérée par le DataTransformer
+            processor: MultipartActDataTransformer::class // Utilisation du DataTransformer pour gérer la logique de création
+        ),
+        new \ApiPlatform\Metadata\GetCollection(), // Accès public pour la collection
     ]
 )]
 #[ORM\EntityListeners(['App\EventListener\ActListener'])]
+/**
+ * @Vich\Uploadable
+ */
 class Act
 {
     #[ORM\Id]
@@ -77,6 +88,15 @@ class Act
     #[ORM\OneToMany(mappedBy: 'act', targetEntity: Like::class, orphanRemoval: true)]
     #[MaxDepth(1)]
     private Collection $likes;
+
+    /**
+     * @Vich\UploadableField(mapping="act_images", fileNameProperty="image")
+     */
+    #[ApiProperty(types: ['https://schema.org/image'], writable: true)]
+    private ?File $imageFile = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $image = null;
 
     public function __construct()
     {
@@ -247,6 +267,30 @@ class Act
     {
         $this->updatedAt = $updatedAt;
 
+        return $this;
+    }
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+        if ($imageFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
         return $this;
     }
 

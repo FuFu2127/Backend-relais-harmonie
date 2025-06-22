@@ -9,11 +9,22 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: ChallengeRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new GetCollection(security: "is_granted('PUBLIC_ACCESS')"),  // Accès public pour la collection
+        new Get(security: "is_granted('PUBLIC_ACCESS')"),           // Accès public pour un élément
+        new Post(security: "is_granted('IS_AUTHENTICATED_FULLY')"),  // Authentification requise pour créer
+        new Put(security: "is_granted('IS_AUTHENTICATED_FULLY')"),   // Authentification requise pour modifier
+    ]
+)]
 class Challenge
 {
     #[ORM\Id]

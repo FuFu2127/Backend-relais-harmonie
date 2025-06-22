@@ -1,9 +1,62 @@
+# Configuration du bundle NelmioCorsBundle qui gère le Cross-Origin Resource Sharing (CORS)
+# Le CORS est un mécanisme qui permet aux ressources web d'être accessibles depuis des domaines différents
+# Ce fichier définit quels domaines peuvent accéder à l'API, quelles méthodes HTTP sont autorisées, etc.
 nelmio_cors:
+    # Configuration par défaut appliquée à toutes les routes sauf si remplacée dans la section "paths"
     defaults:
-        allow_origin: ['http://localhost:5173']
-        allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-        allow_headers: ['Content-Type', 'Authorization']
+        # Permet d'utiliser des expressions régulières dans les valeurs de "allow_origin"
+        origin_regex: true
+        
+        # Domaines autorisés à accéder à l'API, récupérés depuis la variable d'environnement CORS_ALLOW_ORIGIN
+        allow_origin: ['%env(CORS_ALLOW_ORIGIN)%']
+        
+        # Méthodes HTTP autorisées par défaut
+        # GET: récupérer des données
+        # OPTIONS: requête préliminaire pour vérifier les autorisations CORS
+        # POST: créer des données
+        # PUT: mettre à jour complètement une ressource
+        # PATCH: mettre à jour partiellement une ressource
+        # DELETE: supprimer une ressource
+        allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
+        
+        # En-têtes HTTP que les clients sont autorisés à envoyer dans leurs requêtes
+        # Content-Type: indique le format des données envoyées (application/json)
+        # Authorization: utilisé pour l'authentification (Bearer token)
+        # Accept: indique les formats de réponse acceptés 
+        allow_headers: ['Content-Type', 'Authorization', 'Accept']
+        
+        # Link: utilisé pour la pagination hypermedia (API Platform)
+        expose_headers: ['Link']
+        
+        # Durée (en secondes) pendant laquelle le navigateur peut mettre en cache la réponse aux requêtes OPTIONS
+        # 3600 secondes = 1 heure, réduit le nombre de requêtes préliminaires
         max_age: 3600
+    
     paths:
-        '^/api/': ~
+        # Cette configuration s'applique à toutes les routes commençant par "/api/"
+        '^/api/':
+            # Autorise les requêtes depuis n'importe quel domaine (*)
+            allow_origin: ['*'] 
+            
+            # Autorise tous les en-têtes HTTP dans les requêtes
+            allow_headers: ['*']
+            
+            # Réitère les méthodes HTTP autorisées pour ces routes
+            allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
+        
+        # Configuration spécifique pour les routes utilisateurs
+        # Cette règle est plus restrictive et s'applique aux URL commençant par "/api/users"
+        '^/api/users':
+            # Autorise les requêtes depuis n'importe quel domaine
+            allow_origin: ['*']
+            
+            # Autorise tous les en-têtes HTTP
+            allow_headers: ['*']
+            
+            # Interdit l'envoi de cookies d'authentification avec les requêtes
+            allow_credentials: false
+            
+            # RESTRICTION IMPORTANTE: Limite les méthodes autorisées uniquement à GET
+            # On peut seulement lire les données utilisateurs (mesure de sécurité)
+            allow_methods: ['GET']
 

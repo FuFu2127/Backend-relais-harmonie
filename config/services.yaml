@@ -33,10 +33,22 @@ services:
             - []                            # attributes (doit être un tableau vide)
             - '!^/api/(register|login_check)' # path to exclude
 
-    App\DataPersister\ActDataPersister:
-        decorates: 'api_platform.doctrine.orm.state.persist_processor'
+    # Désactive ActDataPersister car nous utilisons maintenant MultipartActDataTransformer
+    # App\DataPersister\ActDataPersister:
+    #    arguments:
+    #        $decorated: '@api_platform.doctrine.orm.state.persist_processor'
+
+    # DataTransformer pour gérer le multipart/form-data
+    App\DataTransformer\MultipartActDataTransformer:
         arguments:
-            - '@security.helper'
-            - '@App\DataPersister\ActDataPersister.inner'
-        autoconfigure: false
-        autowire: false
+            $decorated: '@api_platform.doctrine.orm.state.persist_processor'
+            $entityManager: '@doctrine.orm.entity_manager'
+            $security: '@security.helper'
+        tags:
+            - { name: 'api_platform.state_processor', priority: 10 }
+
+    # Processor pour les commentaires
+    App\State\CommentProcessor:
+        decorates: 'api_platform.doctrine.orm.state.persist_processor'
+        arguments: ['@.inner', '@security.token_storage']
+        tags: ['api_platform.state_processor']
