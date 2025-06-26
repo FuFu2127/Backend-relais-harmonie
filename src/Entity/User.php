@@ -28,7 +28,6 @@ use ApiPlatform\Metadata\GetCollection;
             security: "is_granted('PUBLIC_ACCESS')",  // Permettre l'accès public
             normalizationContext: ['groups' => ['user:read:public']]  // Utiliser un groupe de normalisation spécifique
         ),
-        // ...autres opérations...
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']]
@@ -38,13 +37,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'user:read:public'])]  // Ajoutez 'user:read:public' ici
+    #[Groups(['user:read', 'user:read:public'])] 
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 3, max: 255)]
-    #[Groups(['user:read', 'user:read:public'])]  // Ajouter au groupe public
+    #[Groups(['user:read', 'user:read:public'])]
     private ?string $pseudo = null;
 
     #[ORM\Column(length: 255, unique: true)]
