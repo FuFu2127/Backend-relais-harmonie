@@ -1,28 +1,28 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity; // Déclaration du namespace où se trouve cette classe
 
-use App\Entity\Like;
+use App\Entity\Like; // Import des classes utilisées dans cette entité
 use Symfony\Component\HttpFoundation\File\File;
-use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Vich\UploaderBundle\Mapping\Annotation as Vich; // Annotation pour la gestion des fichiers uploadés
 use ApiPlatform\Metadata\ApiProperty;
 
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\ActRepository;
-use ApiPlatform\Metadata\ApiResource;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
-use Symfony\Component\Validator\Constraints as Assert;
-use App\DataTransformer\MultipartActDataTransformer;
+use Doctrine\DBAL\Types\Types; // Import des types de Doctrine pour les colonnes
+use Doctrine\ORM\Mapping as ORM; // Import des annotations ORM pour la gestion de la base de données
+use App\Repository\ActRepository; // Import du repository pour cette entité
+use ApiPlatform\Metadata\ApiResource; // Import de l'API Platform pour la gestion des ressources API
+use Doctrine\Common\Collections\Collection; // Import de la collection de Doctrine pour gérer les relations
+use Doctrine\Common\Collections\ArrayCollection; // Import concrete de la collection de Doctrine
+use Symfony\Component\Serializer\Annotation\MaxDepth; // Annotation pour la gestion de la profondeur de sérialisation
+use Symfony\Component\Validator\Constraints as Assert; // Import des contraintes de validation
+use App\DataTransformer\MultipartActDataTransformer; // Import du DataTransformer pour gérer la logique de création d'actes
 
-#[ORM\Entity(repositoryClass: ActRepository::class)]
-#[ORM\HasLifecycleCallbacks]
+#[ORM\Entity(repositoryClass: ActRepository::class)] // Déclaration de l'entité Act avec son repository
+#[ORM\HasLifecycleCallbacks] // Indique que cette entité a des callbacks de cycle de vie
 #[ApiResource(
     operations: [
-        new \ApiPlatform\Metadata\Get(), // Accès public
-        new \ApiPlatform\Metadata\Post( // Création d'un nouvel acte
+        new \ApiPlatform\Metadata\Get(), // Opération GET pour lire un seul élément (publique)
+        new \ApiPlatform\Metadata\Post( // Opération POST pour créer un nouvel acte
             security: "is_granted('IS_AUTHENTICATED_FULLY')", // Authentification requise pour créer
             inputFormats: ['multipart' => ['multipart/form-data']], // Format attendu
             deserialize: false, // Désérialisation gérée par le DataTransformer
@@ -31,81 +31,83 @@ use App\DataTransformer\MultipartActDataTransformer;
         new \ApiPlatform\Metadata\GetCollection(), // Accès public pour la collection
     ]
 )]
-#[ORM\EntityListeners(['App\EventListener\ActListener'])]
+#[ORM\EntityListeners(['App\EventListener\ActListener'])] // Écouteur d'événements pour gérer les actions sur l'entité Act
 /**
  * @Vich\Uploadable
  */
 class Act
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Id] // Déclaration de la clé primaire
+    #[ORM\GeneratedValue] // Auto-incrémentation de la clé primaire
+    #[ORM\Column] // Colonne dans la table (par défaut de type integer)
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 3, max: 255)]
+    #[ORM\Column(length: 255)] // Colonne string max 255 caractères
+    #[Assert\NotBlank] // Validation pour s'assurer que le champ n'est pas vide
+    #[Assert\Length(min: 3, max: 255)] // Validation : longueur entre 3 et 255 caractères
     private ?string $title = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 10, max: 1000)]
+    #[ORM\Column(type: Types::TEXT)] // Colonne de type string 
+    #[Assert\NotBlank] // Validation pour s'assurer que le champ n'est pas vide
+    #[Assert\Length(min: 10, max: 1000)] // Validation : longueur entre 10 et 1000 caractères
     private ?string $description = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Url]
+    #[ORM\Column(length: 255, nullable: true)] // Colonne string optionnelle pour l'URL de l'image
+    #[Assert\Url] // Validation pour s'assurer que c'est une URL valide
     private ?string $imgUrl = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 3, max: 255)]
+    #[ORM\Column(length: 255)] // Colonne sting pour la catégorie de l'acte
+    #[Assert\NotBlank] // Validation pour s'assurer que le champ n'est pas vide
+    #[Assert\Length(min: 3, max: 255)] // Validation : longueur entre 3 et 255 caractères
     private ?string $category = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    #[ORM\Column] 
+    private ?\DateTimeImmutable $createdAt = null; // Colonne pour la date de création de l'acte
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
+    private ?\DateTimeImmutable $updatedAt = null; // Colonne pour la date de mise à jour de l'acte
 
-    #[ORM\ManyToOne(inversedBy: 'acts')]
-    #[ORM\JoinColumn(nullable: true)]
-    #[MaxDepth(1)]
-    private ?User $user = null;
+    #[ORM\ManyToOne(inversedBy: 'acts')] // Relation ManyToOne avec l'entité User inverse "acts"
+    #[ORM\JoinColumn(nullable: true)] // La colonne ne peut être null 
+    #[MaxDepth(1)] // Limite la profondeur de sérialisation pour éviter les boucles infinies
+    private ?User $user = null; 
 
-    #[ORM\ManyToOne(inversedBy: 'acts')]
-    #[MaxDepth(1)]
+    #[ORM\ManyToOne(inversedBy: 'acts')] // Relation ManyToOne avec l'entité Challenge inverse "acts"
+    #[MaxDepth(1)] // Limite la profondeur de sérialisation pour éviter les boucles infinies
     private ?Challenge $challenge = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[MaxDepth(1)]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])] // Relation OneToOne avec l'entité Location 
+    #[MaxDepth(1)] // Limite la profondeur de sérialisation pour éviter les boucles infinies
     private ?Location $location = null;
 
-    #[ORM\OneToMany(mappedBy: 'act', targetEntity: Comment::class, orphanRemoval: true)]
-    #[MaxDepth(1)]
+    #[ORM\OneToMany(mappedBy: 'act', targetEntity: Comment::class, orphanRemoval: true)] // Relation OneToMany avec l'entité Comment, les commentaires orphelins sont supprimés
+    #[MaxDepth(1)] // Limite la profondeur de sérialisation pour éviter les boucles infinies
     private Collection $comments;
 
 
-    #[ORM\OneToMany(mappedBy: 'act', targetEntity: Like::class, orphanRemoval: true)]
-    #[MaxDepth(1)]
+    #[ORM\OneToMany(mappedBy: 'act', targetEntity: Like::class, orphanRemoval: true)] // Relation OneToMany avec l'entité Like, les likes orphelins sont supprimés
+    #[MaxDepth(1)] // Limite la profondeur de sérialisation pour éviter les boucles infinies
     private Collection $likes;
 
     /**
      * @Vich\UploadableField(mapping="act_images", fileNameProperty="image")
      */
     #[ApiProperty(types: ['https://schema.org/image'], writable: true)]
-    private ?File $imageFile = null;
+    private ?File $imageFile = null; // Champ pour gérer le fichier image uploadé
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)] // Colonne pour stocker le nom de l'image après upload
     private ?string $image = null;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->comments = new ArrayCollection();
-        $this->likes = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable(); // Initialisation de la date de création à l'heure actuelle
+        $this->comments = new ArrayCollection(); // Initialisation de la collection de commentaires vide
+        $this->likes = new ArrayCollection(); // Initialisation de la collection de likes vide
     }
 
-
+    /**
+     * Getters et Setters pour les propriétés de l'entité Act
+     */
     public function getId(): ?int
     {
         return $this->id;
@@ -203,7 +205,7 @@ class Act
         return $this->comments;
     }
 
-    public function addComment(Comment $comment): static
+    public function addComment(Comment $comment): static // Ajoute un commentaire en prenant soin de lier l'acte au commentaire
     {
         if (!$this->comments->contains($comment)) {
             $this->comments->add($comment);
@@ -212,7 +214,7 @@ class Act
         return $this;
     }
 
-    public function removeComment(Comment $comment): static
+    public function removeComment(Comment $comment): static // Retire un commentaire et dissocier l'acte du commentaire
     {
         if ($this->comments->removeElement($comment)) {
             if ($comment->getAct() === $this) {
@@ -227,7 +229,7 @@ class Act
         return $this->likes;
     }
 
-    public function addLike(Like $like): static
+    public function addLike(Like $like): static // Ajoute un like en prenant soin de lier l'acte au like
     {
         if (!$this->likes->contains($like)) {
             $this->likes->add($like);
@@ -236,7 +238,7 @@ class Act
         return $this;
     }
 
-    public function removeLike(Like $like): static
+    public function removeLike(Like $like): static // Retire un like et dissocier l'acte du like
     {
         if ($this->likes->removeElement($like)) {
             if ($like->getAct() === $this) {
@@ -294,7 +296,7 @@ class Act
         return $this;
     }
 
-    public function __toString(): string
+    public function __toString(): string // Méthode magique pour convertir l'objet en chaîne de caractères
     {
         return $this->title ?? 'Acte';
     }
