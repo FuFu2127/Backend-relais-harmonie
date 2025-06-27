@@ -10,9 +10,11 @@ security:
                 property: email # Propriété utilisée pour identifier l'utilisateur (email)
 
     firewalls: # Définition des firewalls pour la sécurité de l'application
-        public: # Firewall pour les routes publiques
-            pattern: ^/api/contacts # Chemin pour le contact
-            stateless: true 
+        # Firewall pour les routes publiques d'inscription et contact
+        public: 
+            pattern: ^/api/(register|contacts) # Chemin pour l'inscription et le contact
+            stateless: true
+            security: false # Désactive complètement la sécurité pour ces routes
 
         login: # Endpoint pour la connexion des utilisateurs
             pattern:  ^/api/login_check # Chemin pour la vérification de connexion
@@ -25,19 +27,22 @@ security:
                 failure_handler:          lexik_jwt_authentication.handler.authentication_failure # Gestionnaire d'échec pour l'authentification
 
         api:
-            pattern:   ^/api/ # Toutes les routes de l'API
+            pattern:   ^/api/ # Toutes les autres routes de l'API
             stateless: true 
             jwt: ~ # Utilisation de JWT pour l'authentification
 
     access_control:
-        - { path: ^/api/login_check, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Login endpoint pour JWT authentication
-        - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] } # Endpoint pour l'enregistrement des utilisateurs
-        - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] } # Endpoint pour la création d'un utilisateur
-        - { path: ^/api/contacts, methods: [POST], roles: IS_AUTHENTICATED_ANONYMOUSLY } # Endpoint pour l'envoi de messages de contact
+        # Routes publiques (ordre important - du plus spécifique au plus général)
+        - { path: ^/api/login_check, roles: PUBLIC_ACCESS } # Login endpoint pour JWT authentication
+        - { path: ^/api/register, roles: PUBLIC_ACCESS, methods: [POST] } # Endpoint pour l'enregistrement des utilisateurs
+        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: [POST] } # Endpoint pour la création d'un utilisateur
+        - { path: ^/api/contacts, methods: [POST], roles: PUBLIC_ACCESS } # Endpoint pour l'envoi de messages de contact
         - { path: ^/api/challenges, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer les défis
         - { path: ^/api/acts, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer les actes
         - { path: ^/api/users/\d+$, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer un utilisateur spécifique
+        - { path: ^/api/comments, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer les commentaires
+        
+        # Routes protégées (doivent être après les routes publiques)
         - { path: ^/api/challenges, roles: IS_AUTHENTICATED_FULLY } # Endpoint pour les opérations sur les défis (POST, PUT, DELETE)
         - { path: ^/api/acts, roles: IS_AUTHENTICATED_FULLY } # Endpoint pour les opérations sur les actes (POST, PUT, DELETE)
-        - { path: ^/api/comments, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer les commentaires
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY } # Toutes les autres routes de l'API nécessitent une authentification complète
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY } # Toutes les autres routes de l'API nécessitent une authentification complète
