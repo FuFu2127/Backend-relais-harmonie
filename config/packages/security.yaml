@@ -45,4 +45,5 @@ security:
         # Routes protégées (doivent être après les routes publiques)
         - { path: ^/api/challenges, roles: IS_AUTHENTICATED_FULLY } # Endpoint pour les opérations sur les défis (POST, PUT, DELETE)
         - { path: ^/api/acts, roles: IS_AUTHENTICATED_FULLY } # Endpoint pour les opérations sur les actes (POST, PUT, DELETE)
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY } # Toutes les autres routes de l'API nécessitent une authentification complète
+        - { path: ^/api/comments, methods: [GET], roles: PUBLIC_ACCESS } # Endpoint pour récupérer les commentaires
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY } # Toutes les autres routes de l'API nécessitent une authentification complète

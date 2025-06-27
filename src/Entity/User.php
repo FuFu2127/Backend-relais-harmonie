@@ -28,23 +28,23 @@ use ApiPlatform\Metadata\GetCollection; // Opérations API Platform (GET collect
             security: "is_granted('PUBLIC_ACCESS')",  // Accès public possible pour une ressource unique
             normalizationContext: ['groups' => ['user:read:public']]  // Groupe de sérialisation public (plus restreint)
         ),
-        // ... autres opérations possibles
+        // ...autres opérations...
     ],
     normalizationContext: ['groups' => ['user:read']], // Groupe par défaut à la lecture
     denormalizationContext: ['groups' => ['user:write']] // Groupe par défaut à l'écriture
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id] // Clé primaire
-    #[ORM\GeneratedValue] // Auto-incrémentée
-    #[ORM\Column] // Colonne standard
-    #[Groups(['user:read', 'user:read:public'])]  // Inclue cet attribut dans ces groupes de sérialisation
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    #[Groups(['user:read', 'user:read:public'])]  // Ajoutez 'user:read:public' ici
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, unique: true)] // Colonne string unique pour pseudo
-    #[Assert\NotBlank] // Validation : ne doit pas être vide
-    #[Assert\Length(min: 3, max: 255)] // Validation longueur minimale et maximale
-    #[Groups(['user:read', 'user:read:public'])]  // Exposé dans groupes lecture publics et privés
+    #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3, max: 255)]
+    #[Groups(['user:read', 'user:read:public'])]  // Ajouter au groupe public
     private ?string $pseudo = null;
 
     #[ORM\Column(length: 255, unique: true)] // Colonne string unique pour email
